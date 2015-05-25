@@ -64,3 +64,16 @@ reduce lkp = go lkp where
   generalize lkp = \case
     B {} -> Nothing
     F n -> lkp n
+
+nf :: Eq n => Lookup n -> Int -> Term n -> Maybe (Term n)
+nf lkp = go
+  where
+    go fuel term
+      | fuel <= 0 = Nothing
+      | otherwise =
+        let
+          Identity term' = reduce lkp term
+        in
+          if term == term'
+            then Just term
+            else go (fuel-1) term'
