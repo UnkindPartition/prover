@@ -5,11 +5,28 @@ import Control.Monad.Logic
 import Control.Applicative
 import Data.Generics.Geniplate
 import Data.Traversable
+import Data.Functor.Identity
+import Data.Maybe
+import Data.Proxy
 import qualified Data.HashMap.Strict as HM
 import GHC.Generics
 import Bound
 import Ast
 import Wiggle
+
+-- | Class for performing reductions.
+--
+-- Has two instances: one ('W') is for reducing one thing at a time, another
+-- ('Identity') is for doing as many reductions at once as possible.
+class Applicative f => Reducing f where
+  rapply :: (forall t . Alternative t => term -> t term) -> f term -> f term
+
+instance Alternative t => Reducing (W t) where
+  rapply fn = wapply fn
+
+instance Reducing Identity where
+  rapply fn (Identity x) =
+    Identity $ fromMaybe x (fn x)
 
 beta :: Alternative t => Term n -> t (Term n)
 beta = \case
@@ -31,10 +48,14 @@ inline lkp = \case
   Var n | Just d <- lkp n -> pure d
   _ -> empty
 
-reduce :: forall n t . Alternative t => Lookup n -> Term n -> t (Term n)
-reduce lkp = wiggled . go lkp where
-  go :: forall n t . Alternative t => Lookup n -> Term n -> W t (Term n)
-  go lkp = wapply (inline lkp) . wapply beta . wapply eta . \case
+reduce
+  :: forall n f . Reducing f
+  => Lookup n
+  -> Term n
+  -> f (Term n)
+reduce lkp = go lkp where
+  go :: forall n . Lookup n -> Term n -> f (Term n)
+  go lkp = rapply (inline lkp) . rapply beta . rapply eta . \case
     Var n -> pure $ Var n
     App t1 t2 -> App <$> go lkp t1 <*> go lkp t2
     Lam body -> Lam <$> (fmap toScope . go (generalize lkp) . fromScope) body
