@@ -1,5 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-module Parser where
+module Parser (parseExpr, parseDecl, parseDeclsFile) where
 
 import Text.Parsec hiding (parse)
 import qualified Text.Parsec as P
