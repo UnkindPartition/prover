@@ -7,12 +7,13 @@ module Ast where
 import Bound
 import Control.Applicative (Applicative(..))
 import Control.Monad
-import Data.Foldable (Foldable)
+import Data.Foldable (Foldable, toList)
 import Data.Traversable
 import Text.PrettyPrint.Mainland as PP
 import Prelude.Extras (Eq1(..), Show1(..))
 import Data.Hashable
 import Data.Hashable.Extras
+import qualified Data.HashSet as HS
 import GHC.Generics
 
 type VName = String
@@ -50,10 +51,13 @@ instance Show1 Term where
   showsPrec1 = showsPrec
 -}
 instance Show (Term String) where
-  show =
+  show t =
     let
-      vars = [ [i] | i <- ['a'..'z']] ++ [i : show j | j <- [1..], i <- ['a'..'z'] ]
-    in show . pprPrecTerm vars 0
+      free = HS.fromList $ toList t
+      vars =
+        filter (not . flip HS.member free)
+        [ [i] | i <- ['a'..'z']] ++ [i : show j | j <- [1..], i <- ['a'..'z'] ]
+    in show $ pprPrecTerm vars 0 t
 
 instance Functor Term where
   fmap = liftM
