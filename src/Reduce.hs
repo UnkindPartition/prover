@@ -41,8 +41,6 @@ eta = \case
 
   _ -> empty
 
-type Lookup n = forall m . n -> Maybe (Term m)
-
 inline :: Alternative t => Lookup n -> Term n -> t (Term n)
 inline lkp = \case
   Var n | Just d <- lkp n -> pure d
@@ -77,3 +75,16 @@ nf lkp = go
           if term == term'
             then Just term
             else go (fuel-1) term'
+
+----------------------------------------------------------------------
+--                           Lookup
+----------------------------------------------------------------------
+
+type Lookup n = forall m . n -> Maybe (Term m)
+
+lookupFromDecls :: [Decl] -> Lookup String
+lookupFromDecls decls =
+  let
+    hm = HM.fromList [(name, def) | Decl name def <- decls ]
+  in
+    flip HM.lookup hm
