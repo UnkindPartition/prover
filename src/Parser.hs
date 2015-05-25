@@ -5,7 +5,6 @@ import Text.Parsec hiding (parse)
 import qualified Text.Parsec as P
 import Text.Parsec.Pos
 import qualified Data.Loc as Loc
-import qualified Data.Set as Set
 import Data.Foldable (asum)
 import Control.Applicative hiding ((<|>))
 import Bound

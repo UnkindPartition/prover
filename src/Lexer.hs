@@ -5,7 +5,7 @@ import Text.Regex.Applicative
 import Data.Foldable
 import Data.Char
 import Data.Loc
-import qualified Data.Set as Set
+import qualified Data.HashSet as HS
 
 data Token
   = Forall
@@ -17,7 +17,7 @@ pToken :: RE Char Token
 pToken = asum
   [ Forall <$  string "forall"
   , Var    <$> (some (psym (\c -> isAlphaNum c || c == '_')))
-  , Sym    <$> psym (flip Set.member $ Set.fromList ['\\', '.', '(', ')', ':', '=', ';'])
+  , Sym    <$> psym (flip HS.member $ HS.fromList ['\\', '.', '(', ')', ':', '=', ';'])
   ]
 
 pSpace :: RE Char ()
