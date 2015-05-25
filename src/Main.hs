@@ -2,6 +2,7 @@ module Main (main) where
 
 import qualified Control.Arrow as A
 import Control.Monad
+import Control.Exception
 import Options.Applicative
 import Parser
 import Reduce
@@ -31,9 +32,10 @@ main = work =<< execParser opts
       Reduce <$> option termReader (long "reduce" <> metavar "TERM")
 
 work :: Options -> IO ()
-work opts =
+work opts = do
+  decls <- liftM concat $ mapM (either (throwIO . ErrorCall . show) return <=< parseDeclsFile) (oIncludes opts)
   case oMode opts of
     Reduce term ->
-      case nf (const Nothing) 10 term of
+      case nf (lookupFromDecls decls) 10 term of
         Just term' -> print term'
         Nothing -> putStrLn "No reduced form found"
