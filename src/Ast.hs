@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings, LambdaCase, PatternSynonyms, FlexibleInstances, 
-             DeriveFoldable, DeriveTraversable, ScopedTypeVariables, KindSignatures, DeriveGeneric #-}
+             DeriveFoldable, DeriveTraversable, ScopedTypeVariables, KindSignatures, DeriveGeneric,
+             RankNTypes #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Ast where
 
@@ -20,8 +21,15 @@ type VName = String
 --                           Declarations
 ----------------------------------------------------------------------
 
-data Decl = Decl VName (Term String)
-  deriving (Show)
+data Decl = Decl VName (forall n . Term n)
+
+instance Show Ast.Decl where
+  showsPrec p (Decl n d)
+    = showParen (p >= 11) $
+      showString "Decl " .
+      showsPrec 11 n .
+      showString " " .
+      showsPrec 11 (d :: Term String)
 
 ----------------------------------------------------------------------
 --                           Expressions

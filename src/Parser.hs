@@ -29,8 +29,18 @@ parseDeclsFile fname = P.parse (P.many pDecl <* eof) fname . Lexer.lex fname <$>
 ----------------------------------------------------------------------
 
 pDecl :: P Decl
-pDecl =
-  Decl <$> pName <* the (Sym '=') <*> pTerm <* the (Sym ';')
+pDecl = do
+  n <- pName
+  the (Sym '=')
+  d <- pTerm
+  the (Sym ';')
+  if isClosed d
+    then
+      let
+        Just d' = closed d
+      in
+        return $ Decl n d'
+    else fail "Term is not closed"
 
 ----------------------------------------------------------------------
 --                           Expressions
