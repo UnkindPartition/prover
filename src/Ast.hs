@@ -1,5 +1,10 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-module Ast where
+module Ast
+  ( Decl(..)
+  , Term(..)
+  , pprPrecTerm
+  )
+  where
 
 import Bound
 import Control.Applicative (Applicative(..))
