@@ -72,7 +72,13 @@ pprPrecTerm vs p = \case
   Var n -> PP.text n
   App t1 t2 -> parensIf (p >= 2) $
     pprPrecTerm vs 1 t1 <+> pprPrecTerm vs 2 t2
-  Lam b -> parensIf (p >= 1) $
-    let v1:vs' = vs in
-    text ("λ" ++ v1) <> text "." <+>
-    pprPrecTerm vs' 0 (instantiate1 (Var v1) b)
+  term@Lam{} -> parensIf (p >= 1) $ pprLambda vs [] term
+
+pprLambda :: [VName] -> [VName] -> Term VName -> Doc
+pprLambda vs lambdavars = \case
+  Lam b ->
+    let v1:vs' = vs
+    in pprLambda vs' (v1:lambdavars) (instantiate1 (Var v1) b)
+  term ->
+    text "λ" <> spread (map text lambdavars) <> dot <+>
+    pprPrecTerm vs 0 term
