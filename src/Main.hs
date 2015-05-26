@@ -6,6 +6,7 @@ import Control.Exception
 import Options.Applicative
 import Parser
 import Reduce
+import Equality
 import Ast
 
 data Options = Options

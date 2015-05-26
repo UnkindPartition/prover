@@ -1,7 +1,6 @@
 {-# LANGUAGE LambdaCase, ViewPatterns, ScopedTypeVariables, RankNTypes #-}
 module Reduce where
 
-import Control.Monad.Logic
 import Control.Applicative
 import Data.Generics.Geniplate
 import Data.Traversable
