@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Parser (parseExpr, parseDecl, parseDeclsFile) where
 
 import Text.Parsec hiding (parse)

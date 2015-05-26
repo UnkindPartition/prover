@@ -1,14 +1,10 @@
-{-# LANGUAGE LambdaCase, ViewPatterns, ScopedTypeVariables, RankNTypes #-}
 module Reduce where
 
 import Control.Applicative
-import Data.Generics.Geniplate
 import Data.Traversable
 import Data.Functor.Identity
 import Data.Maybe
-import Data.Proxy
 import qualified Data.HashMap.Strict as HM
-import GHC.Generics
 import Bound
 import Ast
 import Wiggle
@@ -46,11 +42,11 @@ inline lkp = \case
   _ -> empty
 
 reduce
-  :: forall n f . Reducing f
-  => Lookup n
-  -> Term n
-  -> f (Term n)
-reduce lkp = go lkp where
+  :: forall n0 f . Reducing f
+  => Lookup n0
+  -> Term n0
+  -> f (Term n0)
+reduce lkp0 = go lkp0 where
   go :: forall n . Lookup n -> Term n -> f (Term n)
   go lkp = rapply (inline lkp) . rapply beta . rapply eta . \case
     Var n -> pure $ Var n

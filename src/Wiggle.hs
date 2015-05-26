@@ -4,7 +4,6 @@
 module Wiggle (W(..), wiggled, wapply) where
 
 import Control.Applicative
-import Data.Traversable
 
 data W t a = W (t a) a
 instance Functor t => Functor (W t) where

@@ -2,9 +2,7 @@ module Equality where
 
 import Control.Monad.Logic
 import Control.Applicative
-import Data.Traversable
 import Data.Foldable
-import Data.Functor.Compose
 import qualified Data.HashSet as HS
 import Data.Hashable
 import Data.Tuple.Homogenous
@@ -18,11 +16,11 @@ equal
   -> Int -- ^ fuel
   -> Tuple2 (Term n)
   -> Bool
-equal lkp fuel terms =
+equal lkp fuel0 terms =
   let
     termsHS = HS.singleton <$> terms
   in
-    go fuel termsHS termsHS
+    go fuel0 termsHS termsHS
 
   where
 

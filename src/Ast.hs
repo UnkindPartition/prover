@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings, LambdaCase, PatternSynonyms, FlexibleInstances, 
-             DeriveFoldable, DeriveTraversable, ScopedTypeVariables, KindSignatures, DeriveGeneric,
-             RankNTypes #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Ast where
 
@@ -10,7 +7,7 @@ import Control.Monad
 import Data.Foldable (Foldable, toList)
 import Data.Traversable
 import Text.PrettyPrint.Mainland as PP
-import Prelude.Extras (Eq1(..), Show1(..))
+import Prelude.Extras (Eq1(..))
 import Data.Hashable
 import Data.Hashable.Extras
 import qualified Data.HashSet as HS
@@ -46,10 +43,6 @@ instance Eq1 Term
 instance Hashable n => Hashable (Term n)
 instance Hashable1 Term
 
-{-
-instance Show1 Term where
-  showsPrec1 = showsPrec
--}
 instance Show (Term String) where
   show t =
     let
