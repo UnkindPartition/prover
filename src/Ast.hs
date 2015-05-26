@@ -88,5 +88,5 @@ pprLambda vs lambdavars = \case
     let v1:vs' = vs
     in pprLambda vs' (v1:lambdavars) (instantiate1 (Var v1) b)
   term ->
-    text "λ" <> spread (map text lambdavars) <> dot <+>
+    text "λ" <> spread (map text $ reverse lambdavars) <> dot <+>
     pprPrecTermV vs 0 term
