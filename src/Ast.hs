@@ -74,5 +74,5 @@ pprPrecTerm vs p = \case
     pprPrecTerm vs 1 t1 <+> pprPrecTerm vs 2 t2
   Lam b -> parensIf (p >= 1) $
     let v1:vs' = vs in
-    text ("\\" ++ v1) <> text "." <+>
+    text ("λ" ++ v1) <> text "." <+>
     pprPrecTerm vs' 0 (instantiate1 (Var v1) b)
