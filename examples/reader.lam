@@ -1,0 +1,9 @@
+-- Reader monad
+-- see https://ro-che.info/articles/2015-02-22-examples-monads-dynamic-language
+return = \x r . x ;
+bind = \a k r.k (a r) r ;
+
+-- test monad laws:
+-- prover -i reader.lam --equal 'bind (return x) k' 'k x'
+-- prover -i reader.lam --equal 'bind x return' x
+-- prover -i reader.lam --equal 'bind a (\x. bind (f x) g)' 'bind (bind a f) g'
