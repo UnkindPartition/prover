@@ -5,11 +5,13 @@ module Reduce
   , lookupFromDecls
   , Reducing(..)
   , Reduction(..)
+  , reductionTraverseN
   ) where
 
 import Control.Applicative
 import Control.Monad.Logic
 import Data.Traversable
+import Data.Foldable
 import qualified Data.HashMap.Strict as HM
 import Bound
 import Ast
@@ -53,12 +55,20 @@ data Rule n
   = Beta
   | Eta
   | Inline n
+  deriving (Functor, Foldable, Traversable)
 
 data Reduction n term = Reduction
   { reducedBy   :: Rule n
   , reducedTo   :: term
   }
   deriving Functor
+
+reductionTraverseN
+  :: Applicative t
+  => (n -> t n')
+  -> Reduction n  term
+  -> t (Reduction n' term)
+reductionTraverseN f r = (\by -> r { reducedBy = by }) <$> traverse f (reducedBy r)
 
 ----------------------------------------------------------------------
 --                            Reductions
