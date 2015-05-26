@@ -1,4 +1,11 @@
-module Reduce where
+module Reduce
+  ( reduce
+  , nf
+  , Lookup
+  , lookupFromDecls
+  , Reducing(..)
+  , Reduction(..)
+  ) where
 
 import Control.Applicative
 import Control.Monad.Logic
