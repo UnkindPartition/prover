@@ -55,13 +55,13 @@ data Rule n
   = Beta
   | Eta
   | Inline n
-  deriving (Functor, Foldable, Traversable)
+  deriving (Show, Functor, Foldable, Traversable)
 
 data Reduction n term = Reduction
   { reducedBy   :: Rule n
   , reducedTo   :: term
   }
-  deriving Functor
+  deriving (Show, Functor)
 
 reductionTraverseN
   :: Applicative t

@@ -1,5 +1,6 @@
 module Equality where
 
+import Prelude hiding (sum)
 import Control.Monad.Logic
 import Control.Applicative
 import Data.Foldable
@@ -7,6 +8,7 @@ import Data.Functor.Compose
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Data.Tuple.Homogenous
+import Data.Ord (comparing)
 import Ast
 import Reduce
 import Wiggle
@@ -35,7 +37,7 @@ equal
   => Lookup n
   -> Int -- ^ fuel
   -> Tuple2 (Term n)
-  -> Bool
+  -> Maybe (Tuple2 [Reduction n (Term n)])
 equal lkp fuel0 terms =
   let
     termsHS = flip HM.singleton [] <$> terms
@@ -44,13 +46,14 @@ equal lkp fuel0 terms =
 
   where
 
-  go :: Int -> Tuple2 (RMap n) -> Tuple2 (RMap n) -> Bool
+  go :: Int -> Tuple2 (RMap n) -> Tuple2 (RMap n) -> Maybe (Tuple2 [Reduction n (Term n)])
   go fuel accd new
-    | fuel <= 0 = False
+    | fuel <= 0 = Nothing
 
     | Tuple2 (t1, t2) <- accd,
-      not . HM.null $ t1 `HM.intersection` t2
-      = True
+      let common = HM.intersectionWith (,) t1 t2,
+      not $ HM.null common
+      = Just $ maximumBy (comparing $ sum . fmap length) $ map Tuple2 $ HM.elems common
     
     | otherwise =
       let
