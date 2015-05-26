@@ -13,6 +13,7 @@ import Control.Monad.Logic
 import Data.Traversable
 import Data.Foldable
 import qualified Data.HashMap.Strict as HM
+import Text.PrettyPrint.Mainland as PP hiding (empty)
 import Bound
 import Ast
 
@@ -69,6 +70,18 @@ reductionTraverseN
   -> Reduction n  term
   -> t (Reduction n' term)
 reductionTraverseN f r = (\by -> r { reducedBy = by }) <$> traverse f (reducedBy r)
+
+instance Pretty (Rule VName) where
+  ppr = \case
+    Beta -> text "β-reduce"
+    Eta -> text "η-reduce"
+    Inline n -> text "inline" <+> text n
+
+instance (Pretty (Rule n), Pretty term) => Pretty (Reduction n term) where
+  ppr Reduction{..} =
+    text "  {-" <+> ppr reducedBy <+> text "-}" </>
+    equals <+> ppr reducedTo
+  pprList = stack . map ppr
 
 ----------------------------------------------------------------------
 --                            Reductions

@@ -53,7 +53,9 @@ equal lkp fuel0 terms =
     | Tuple2 (t1, t2) <- accd,
       let common = HM.intersectionWith (,) t1 t2,
       not $ HM.null common
-      = Just $ maximumBy (comparing $ sum . fmap length) $ map Tuple2 $ HM.elems common
+      = Just . fmap reverse .
+        maximumBy (comparing $ sum . fmap length) .
+        map Tuple2 $ HM.elems common
     
     | otherwise =
       let

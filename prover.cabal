@@ -32,7 +32,8 @@ executable prover
     RankNTypes,
     RecordWildCards,
     DefaultSignatures,
-    DeriveFunctor
+    DeriveFunctor,
+    FlexibleContexts
   build-depends:
     base >=4.6 && <5,
     bound,

@@ -2,6 +2,7 @@
 module Ast
   ( Decl(..)
   , Term(..)
+  , VName
   )
   where
 

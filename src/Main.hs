@@ -8,6 +8,9 @@ import Options.Applicative
 import Data.Tuple.Homogenous
 import Data.Foldable
 import Data.Traversable
+import Data.Monoid
+import Data.List (intersperse)
+import Text.PrettyPrint.Mainland as PP
 import Parser
 import Reduce
 import Equality
@@ -51,4 +54,13 @@ work Options{..} = do
       case nf lkp oFuel term of
         Just term' -> print term'
         Nothing -> putStrLn "No reduced form found"
-    Equal terms -> print $ equal lkp oFuel terms
+    Equal terms ->
+      case equal lkp oFuel terms of
+        Nothing -> putStrLn "Could not prove equality"
+        Just reds ->
+          let
+            docs =
+              (</>) <$>
+                (ppr <$> terms) <*>
+                (ppr <$> reds)
+          in print $ mconcat $ intersperse (line <> line) $ toList docs
