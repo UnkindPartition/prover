@@ -1,7 +1,7 @@
 -- adapted from:
 -- https://www.reddit.com/r/haskell/comments/11mnw5/wiggling_sums_a_somewhat_interesting_traversable/c6nzowc
 
-module Wiggle (W(..), wiggled, wapply) where
+module Wiggle (W(..), wiggled) where
 
 import Control.Applicative
 import Control.Monad.Logic
@@ -42,6 +42,3 @@ instance FSum t => Applicative (W t) where
 
 wiggled :: W t a -> t a
 wiggled (W xs _) = xs
-
-wapply :: Alternative t => (a -> t a) -> W t a -> W t a
-wapply f (W xs x) = W (xs <|> f x) x
