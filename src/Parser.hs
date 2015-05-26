@@ -59,9 +59,6 @@ the t = tok $ \case
 paren :: P a -> P a
 paren p = the (Sym '(') *> p <* the (Sym ')')
 
-optParen :: P a -> P a
-optParen p = paren p <|> p
-
 pLambda :: P (Term String)
 pLambda = do
   the (Sym '\\')
