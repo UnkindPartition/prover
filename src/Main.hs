@@ -15,6 +15,7 @@ import Ast
 
 data Options = Options
   { oIncludes :: [FilePath]
+  , oFuel :: Int
   , oMode :: Mode
   }
 
@@ -33,6 +34,7 @@ main = work =<< execParser opts
     optsParser =
       Options
         <$> many (strOption (long "include" <> short 'i' <> metavar "FILE"))
+        <*> option auto (long "fuel" <> value 10 <> metavar "NUM" <> help "Reduction limit (default: 10)")
         <*> modeParser
     modeParser = asum
       [ Reduce <$> option termReader (long "reduce" <> metavar "TERM")
@@ -41,12 +43,12 @@ main = work =<< execParser opts
       ]
 
 work :: Options -> IO ()
-work opts = do
-  decls <- liftM concat $ mapM (either (throwIO . ErrorCall . show) return <=< parseDeclsFile) (oIncludes opts)
+work Options{..} = do
+  decls <- liftM concat $ mapM (either (throwIO . ErrorCall . show) return <=< parseDeclsFile) oIncludes
   let lkp = lookupFromDecls decls
-  case oMode opts of
+  case oMode of
     Reduce term ->
-      case nf lkp 10 term of
+      case nf lkp oFuel term of
         Just term' -> print term'
         Nothing -> putStrLn "No reduced form found"
-    Equal terms -> print $ equal lkp 10 terms
+    Equal terms -> print $ equal lkp oFuel terms
