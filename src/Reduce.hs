@@ -1,62 +1,101 @@
 module Reduce where
 
 import Control.Applicative
+import Control.Monad.Logic
 import Data.Traversable
-import Data.Functor.Identity
-import Data.Maybe
 import qualified Data.HashMap.Strict as HM
 import Bound
 import Ast
-import Wiggle
 
--- | Class for performing reductions.
---
--- Has two instances: one ('W') is for reducing one thing at a time, another
--- ('Identity') is for doing as many reductions at once as possible.
-class Applicative f => Reducing f where
-  rapply :: (forall t . Alternative t => term -> t term) -> f term -> f term
+----------------------------------------------------------------------
+--                          'Reducing' class
+----------------------------------------------------------------------
 
-instance Alternative t => Reducing (W t) where
-  rapply fn = wapply fn
+-- | Class for performing reductions
+class Reducing f where
+  -- | Apply a reduction
+  rapply :: (term -> Maybe (Reduction n term)) -> f n term -> f n term
 
-instance Reducing Identity where
-  rapply fn (Identity x) =
-    Identity $ fromMaybe x (fn x)
+  -- | 'fmap' for the second type parameter
+  rfmap :: (a -> b) -> f n a -> f n b
+  rfmap f a = rpure f `rap` a
 
-beta :: Alternative t => Term n -> t (Term n)
-beta = \case
+  -- | 'pure' for the second type parameter
+  rpure :: a -> f n a
+
+  -- | '<*>' for the second type parameter
+  rap :: f n (a -> b) -> f n a -> f n b
+
+  -- | 'mapMaybe' for the first type parameter
+  rmapMaybe :: (n -> Maybe n') -> f n a -> f n' a
+
+newtype Reduce n a = Reduce a
+instance Reducing Reduce where
+  rapply fn (Reduce x) =
+    Reduce $ maybe x reducedTo (fn x)
+  rfmap f (Reduce x) = Reduce $ f x
+  rpure = Reduce
+  rap (Reduce f) (Reduce x) = Reduce $ f x
+  rmapMaybe _ (Reduce x) = Reduce x
+
+----------------------------------------------------------------------
+--                          'Reduction' type
+----------------------------------------------------------------------
+
+data Rule n
+  = Beta
+  | Eta
+  | Inline n
+
+data Reduction n term = Reduction
+  { reducedBy   :: Rule n
+  , reducedTo   :: term
+  }
+  deriving Functor
+
+----------------------------------------------------------------------
+--                            Reductions
+----------------------------------------------------------------------
+
+beta :: Term n -> Maybe (Reduction n (Term n))
+beta = fmap (Reduction Beta) . \case
   App (Lam body) arg -> pure $ instantiate1 arg body
   _ -> empty
 
-eta :: Alternative t => Term n -> t (Term n)
-eta = \case
+eta :: Term n -> Maybe (Reduction n (Term n))
+eta = fmap (Reduction Eta) . \case
   Lam (fromScope -> App arg (Var (B ())))
 
     | F term <- sequenceA arg -> pure term
 
   _ -> empty
 
-inline :: Alternative t => Lookup n -> Term n -> t (Term n)
+inline :: Lookup n -> Term n -> Maybe (Reduction n (Term n))
 inline lkp = \case
-  Var n | Just d <- lkp n -> pure d
+  Var n | Just d <- lkp n ->
+    pure $ Reduction (Inline n) d
   _ -> empty
 
 reduce
   :: forall n0 f . Reducing f
   => Lookup n0
   -> Term n0
-  -> f (Term n0)
+  -> f n0 (Term n0)
 reduce lkp0 = go lkp0 where
-  go :: forall n . Lookup n -> Term n -> f (Term n)
+  go :: forall n . Lookup n -> Term n -> f n (Term n)
   go lkp = rapply (inline lkp) . rapply beta . rapply eta . \case
-    Var n -> pure $ Var n
-    App t1 t2 -> App <$> go lkp t1 <*> go lkp t2
-    Lam body -> Lam <$> (fmap toScope . go (generalize lkp) . fromScope) body
+    Var n -> rpure $ Var n
+    App t1 t2 -> App `rfmap` go lkp t1 `rap` go lkp t2
+    Lam body -> rmapMaybe shrink $
+      Lam `rfmap` (rfmap toScope . go (generalize lkp) . fromScope) body
+
+  shrink :: Var x n -> Maybe n
+  shrink = \case
+    B {} -> Nothing
+    F n -> Just n
 
   generalize :: forall x n . Lookup n -> Lookup (Var x n)
-  generalize lkp = \case
-    B {} -> Nothing
-    F n -> lkp n
+  generalize lkp = lkp <=< shrink
 
 nf :: Eq n => Lookup n -> Int -> Term n -> Maybe (Term n)
 nf lkp = go
@@ -65,7 +104,7 @@ nf lkp = go
       | fuel <= 0 = Nothing
       | otherwise =
         let
-          Identity term' = reduce lkp term
+          Reduce term' = reduce lkp term
         in
           if term == term'
             then Just term

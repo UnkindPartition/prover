@@ -31,7 +31,8 @@ executable prover
     ViewPatterns,
     RankNTypes,
     RecordWildCards,
-    DefaultSignatures
+    DefaultSignatures,
+    DeriveFunctor
   build-depends:
     base >=4.6 && <5,
     bound,
