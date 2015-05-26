@@ -2,7 +2,6 @@
 module Ast
   ( Decl(..)
   , Term(..)
-  , pprPrecTerm
   )
   where
 
@@ -49,13 +48,7 @@ instance Hashable n => Hashable (Term n)
 instance Hashable1 Term
 
 instance Show (Term String) where
-  show t =
-    let
-      free = HS.fromList $ toList t
-      vars =
-        filter (not . flip HS.member free)
-        [ [i] | i <- ['a'..'z']] ++ [i : show j | j <- [1..], i <- ['a'..'z'] ]
-    in show $ pprPrecTerm vars 0 t
+  show = show . ppr
 
 instance Functor Term where
   fmap = liftM
@@ -72,11 +65,20 @@ instance Monad Term where
       App t1 t2 -> App (t1 >>= f) (t2 >>= f)
       Lam b -> Lam (b >>>= f)
 
-pprPrecTerm :: [VName] -> Int -> Term VName -> Doc
-pprPrecTerm vs p = \case
+instance Pretty (Term VName) where
+  pprPrec p t =
+    let
+      free = HS.fromList $ toList t
+      vars =
+        filter (not . flip HS.member free)
+        [ [i] | i <- ['a'..'z']] ++ [i : show j | j <- [1..], i <- ['a'..'z'] ]
+    in pprPrecTermV vars p t
+
+pprPrecTermV :: [VName] -> Int -> Term VName -> Doc
+pprPrecTermV vs p = \case
   Var n -> PP.text n
   App t1 t2 -> parensIf (p >= 2) $
-    pprPrecTerm vs 1 t1 <+> pprPrecTerm vs 2 t2
+    pprPrecTermV vs 1 t1 <+> pprPrecTermV vs 2 t2
   term@Lam{} -> parensIf (p >= 1) $ pprLambda vs [] term
 
 pprLambda :: [VName] -> [VName] -> Term VName -> Doc
@@ -86,4 +88,4 @@ pprLambda vs lambdavars = \case
     in pprLambda vs' (v1:lambdavars) (instantiate1 (Var v1) b)
   term ->
     text "λ" <> spread (map text lambdavars) <> dot <+>
-    pprPrecTerm vs 0 term
+    pprPrecTermV vs 0 term
