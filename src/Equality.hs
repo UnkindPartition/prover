@@ -8,6 +8,7 @@ import Data.Functor.Compose
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Data.Tuple.Homogenous
+import Data.Monoid
 import Data.Ord (comparing)
 import Ast
 import Reduce
@@ -60,7 +61,7 @@ equal lkp fuel0 terms =
     | otherwise =
       let
         new' = flip fmap new $
-          HM.unions .
+          foldl' (HM.unionWith minReductions) HM.empty .
           map reduce1 .
           HM.toList
       in
@@ -77,3 +78,23 @@ equal lkp fuel0 terms =
     HM.fromList .
     map (\r -> (reducedTo r, r:reductions)) .
     gathered . reduce lkp $ t
+
+-- | Pick a "nicer" reduction chain
+minReductions
+  :: [Reduction n t]
+  -> [Reduction n t]
+  -> [Reduction n t]
+minReductions rs1 rs2 =
+  -- try to pick the shorter one
+  case comparing length rs1 rs2 <> mconcat (zipWith compareInline rs1 rs2) of
+    LT -> rs1
+    _  -> rs2
+  where
+    -- compare two reductions; prefer non-inlining one
+    compareInline :: Reduction n t -> Reduction n t -> Ordering
+    compareInline r1 r2 =
+      case untuple2 $ reducedBy <$> Tuple2 (r1, r2) of
+        (Inline {}, Inline {}) -> EQ
+        (Inline {}, _        ) -> GT
+        (_,         Inline {}) -> LT
+        (_,         _        ) -> EQ

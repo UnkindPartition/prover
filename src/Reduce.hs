@@ -5,6 +5,7 @@ module Reduce
   , lookupFromDecls
   , Reducing(..)
   , Reduction(..)
+  , Rule(..)
   , reductionTraverseN
   ) where
 
