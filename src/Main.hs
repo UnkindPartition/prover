@@ -8,8 +8,6 @@ import Options.Applicative
 import Data.Tuple.Homogenous
 import Data.Foldable
 import Data.Traversable
-import Data.Monoid
-import Data.List (intersperse)
 import Text.PrettyPrint.Mainland as PP
 import Parser
 import Reduce
@@ -59,8 +57,13 @@ work Options{..} = do
         Nothing -> putStrLn "Could not prove equality"
         Just reds ->
           let
-            docs =
+            Tuple2 (doc1, doc2) =
               (</>) <$>
                 (ppr <$> terms) <*>
                 (ppr <$> reds)
-          in print $ mconcat $ intersperse (line <> line) $ toList docs
+          in
+            case untuple2 reds of
+              ([], []) -> putStrLn "Terms are α-equivalent"
+              (_,  []) -> print doc1
+              ([], _ ) -> print doc2
+              _ -> print $ doc1 </> line <> doc2
