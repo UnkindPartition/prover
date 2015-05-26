@@ -47,7 +47,7 @@ pDecl = do
 
 pName :: P String
 pName = tok $ \case
-  Lexer.Var n -> Just n 
+  Lexer.Var n -> Just n
   _ -> Nothing
 
 the :: Token -> P ()
@@ -60,7 +60,7 @@ paren p = the (Sym '(') *> p <* the (Sym ')')
 
 pLambda :: P (Term String)
 pLambda = do
-  the (Sym '\\')
+  the (Sym '\\') <|> the (Sym 'λ')
   vars <- P.many pName
   the (Sym '.')
   body <- pTerm

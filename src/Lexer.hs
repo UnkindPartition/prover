@@ -17,8 +17,8 @@ data Token
 pToken :: RE Char Token
 pToken = asum
   [ Forall <$  string "forall"
-  , Var    <$> (some (psym (\c -> isAlphaNum c || c == '_')))
-  , Sym    <$> psym (flip HS.member $ HS.fromList ['\\', '.', '(', ')', ':', '=', ';'])
+  , Var    <$> (some (psym (\c -> isAlphaNum c && c /= 'λ' || c == '_')))
+  , Sym    <$> psym (flip HS.member $ HS.fromList ['\\', 'λ', '.', '(', ')', ':', '=', ';'])
   ]
 
 pSpace :: RE Char ()
