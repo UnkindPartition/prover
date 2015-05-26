@@ -6,6 +6,7 @@ import Data.Foldable
 import Data.Char
 import Data.Loc
 import qualified Data.HashSet as HS
+import Control.Monad (void)
 
 data Token
   = Forall
@@ -21,7 +22,11 @@ pToken = asum
   ]
 
 pSpace :: RE Char ()
-pSpace = () <$ (some $ psym isSpace)
+pSpace = asum
+  [ void $ some $ psym isSpace
+  , void $ string "--" *> many (psym (not . (== nl))) *> sym nl
+  ]
+  where nl = '\n'
 
 lex :: String -> String -> [L Token]
 lex = tokens pToken pSpace
