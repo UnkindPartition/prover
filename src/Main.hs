@@ -35,7 +35,7 @@ main = work =<< execParser opts
     optsParser =
       Options
         <$> many (strOption (long "include" <> short 'i' <> metavar "FILE"))
-        <*> option auto (long "fuel" <> value 10 <> metavar "NUM" <> help "Reduction limit (default: 10)")
+        <*> option auto (long "fuel" <> value 10 <> metavar "NUM" <> help "Iteration limit (default: 10)")
         <*> modeParser
     modeParser = asum
       [ Reduce <$> option termReader (long "reduce" <> metavar "TERM")
