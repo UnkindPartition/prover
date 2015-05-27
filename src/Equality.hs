@@ -37,9 +37,10 @@ equal
   :: forall n . (Hashable n, Eq n)
   => Lookup n
   -> Int -- ^ fuel
+  -> Maybe Int -- ^ term size limit
   -> Tuple2 (Term n)
   -> Maybe (Tuple2 [Reduction n (Term n)])
-equal lkp fuel0 terms =
+equal lkp fuel0 sizeLim terms =
   let
     termsHS = flip HM.singleton [] <$> terms
   in
@@ -77,6 +78,7 @@ equal lkp fuel0 terms =
   reduce1 (t, reductions) =
     HM.fromList .
     map (\r -> (reducedTo r, r:reductions)) .
+    maybe id (\lim -> filter (\r -> termSize (reducedTo r) <= lim)) sizeLim .
     gathered . reduce lkp $ t
 
 -- | Pick a "nicer" reduction chain
