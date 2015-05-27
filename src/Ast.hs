@@ -24,15 +24,8 @@ type VName = String
 --                           Declarations
 ----------------------------------------------------------------------
 
-data Decl = Decl VName (forall n . Term n)
-
-instance Show Ast.Decl where
-  showsPrec p (Decl n d)
-    = showParen (p >= 11) $
-      showString "Decl " .
-      showsPrec 11 n .
-      showString " " .
-      showsPrec 11 (d :: Term String)
+data Decl = Decl VName (Term VName)
+  deriving Show
 
 ----------------------------------------------------------------------
 --                           Expressions

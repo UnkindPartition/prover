@@ -126,7 +126,7 @@ reduce lkp0 = go lkp0 where
     F n -> Just n
 
   generalize :: forall x n . Lookup n -> Lookup (Var x n)
-  generalize lkp = lkp <=< shrink
+  generalize lkp = fmap (fmap F) . lkp <=< shrink
 
 nf :: Eq n => Lookup n -> Int -> Term n -> Maybe (Term n)
 nf lkp = go
@@ -145,7 +145,7 @@ nf lkp = go
 --                           Lookup
 ----------------------------------------------------------------------
 
-type Lookup n = forall m . n -> Maybe (Term m)
+type Lookup n = n -> Maybe (Term n)
 
 lookupFromDecls :: [Decl] -> Lookup String
 lookupFromDecls decls =
