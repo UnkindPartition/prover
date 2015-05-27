@@ -1,0 +1,15 @@
+zero = \f x.x;
+one = \f x. f x;
+two = \f x. f (f x);
+three = \f x. f (f (f x));
+
+add = \a b f x. a f (b f x);
+mult = \a b f x. a (b f) x;
+-- predecessor, i.e. \n. n - 1
+-- needs pair.lam and bool.lam
+pred = \n f x. snd (n (\p. pair true (fst p f (\x.x) (snd p)) ) (pair false x));
+
+-- factorial implementation
+-- needs pair.lam, bool.lam, and fixpoint.lam
+is_zero = \n t f. n (\z. f) t;
+fact = Y (\rec n. is_zero n one (mult n (fact (pred n))));
