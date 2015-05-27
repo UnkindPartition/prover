@@ -2,6 +2,7 @@
 module Ast
   ( Decl(..)
   , Term(..)
+  , termSize
   , VName
   )
   where
@@ -67,6 +68,12 @@ instance Pretty (Term VName) where
         filter (not . flip HS.member free)
         [ [i] | i <- ['a'..'z']] ++ [i : show j | j <- [1..], i <- ['a'..'z'] ]
     in pprPrecTermV vars p t
+
+termSize :: Term n -> Int
+termSize = \case
+  Var {} -> 1
+  App a1 a2 -> 1 + termSize a1 + termSize a2
+  Lam sc -> 1 + termSize (fromScope sc)
 
 pprPrecTermV :: [VName] -> Int -> Term VName -> Doc
 pprPrecTermV vs p = \case
