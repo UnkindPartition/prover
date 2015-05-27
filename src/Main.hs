@@ -22,7 +22,7 @@ data Options = Options
 
 data Mode
   = Reduce (Term String)
-  | Equal (Tuple2 (Term String))
+  | Equal (Tuple2 (Term String)) (Maybe Int)
 
 termReader :: ReadM (Term String)
 termReader = eitherReader $ A.left show . parseExpr "<cmdline>"
@@ -41,6 +41,7 @@ main = work =<< execParser opts
       [ Reduce <$> option termReader (long "reduce" <> metavar "TERM")
       , Equal <$ flag' () (long "equal")
         <*> (sequenceA . pure $ argument termReader (metavar "TERM"))
+        <*> optional (option auto (long "size-limit" <> metavar "NUM" <> help "Do not consider terms that are larger than NUM"))
       ]
 
 work :: Options -> IO ()
@@ -52,8 +53,8 @@ work Options{..} = do
       case nf lkp oFuel term of
         Just term' -> print term'
         Nothing -> putStrLn "No reduced form found"
-    Equal terms ->
-      case equal lkp oFuel terms of
+    Equal terms mbLimit ->
+      case equal lkp oFuel mbLimit terms of
         Nothing -> putStrLn "Could not prove equality"
         Just reds ->
           let
