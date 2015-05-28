@@ -44,7 +44,6 @@ executable prover
     parsec,
     srcloc,
     logict,
-    geniplate,
     unordered-containers,
     lexer-applicative,
     regex-applicative,
