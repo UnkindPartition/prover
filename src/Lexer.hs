@@ -5,8 +5,8 @@ import Text.Regex.Applicative
 import Data.Foldable
 import Data.Char
 import Data.Loc
+import Data.Monoid
 import qualified Data.HashSet as HS
-import Control.Monad (void)
 
 data Token
   = Forall
@@ -14,19 +14,19 @@ data Token
   | Sym Char
   deriving (Eq, Show)
 
-pToken :: RE Char Token
-pToken = asum
+lToken :: Lexer Token
+lToken = token . longest $ asum
   [ Forall <$  string "forall"
   , Var    <$> (some (psym (\c -> isAlphaNum c && c /= 'λ' || c == '_')))
   , Sym    <$> psym (flip HS.member $ HS.fromList ['\\', 'λ', '.', '(', ')', ':', '=', ';'])
   ]
 
-pSpace :: RE Char ()
-pSpace = asum
-  [ void $ some $ psym isSpace
-  , void $ string "--" *> many (psym (not . (== nl))) *> sym nl
+lSpace :: Lexer Token
+lSpace = fold
+  [ whitespace $ longest $ some $ psym isSpace
+  , whitespace $ longestShortest (string "--") (const $ many anySym *> sym nl)
   ]
   where nl = '\n'
 
 lex :: String -> String -> [L Token]
-lex = tokens pToken pSpace
+lex n s = streamToList $ runLexer (lToken <> lSpace) n s

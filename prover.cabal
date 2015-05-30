@@ -45,7 +45,7 @@ executable prover
     srcloc,
     logict,
     unordered-containers,
-    lexer-applicative,
+    lexer-applicative >= 2.1,
     regex-applicative,
     optparse-applicative,
     transformers,

@@ -5,7 +5,7 @@ packages:
 extra-deps:
   # lexer-applicative and tuples-homogenous are not in LTS 2.10;
   # will be in the next one
-  - lexer-applicative-1.1
+  - lexer-applicative-2.1
   - tuples-homogenous-h98-0.1.1.0
 
   # LTS 2.10 contains an old (0.4.x) version of srcloc, so we override it
