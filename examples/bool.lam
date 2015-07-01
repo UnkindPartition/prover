@@ -1,5 +1,5 @@
 true = \t f. t;
 false = \t f. f;
 not = \b t f. b f t;
-and = \b1 b2. b1 b2 f;
-or =  \b1 b2. b1 t b2;
+and = \b1 b2. b1 b2 false;
+or =  \b1 b2. b1 true b2;
