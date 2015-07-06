@@ -65,6 +65,6 @@ work Options{..} = do
           in
             case untuple2 reds of
               ([], []) -> putStrLn "Terms are α-equivalent"
-              (_,  []) -> print doc1
-              ([], _ ) -> print doc2
-              _ -> print $ doc1 </> line <> doc2
+              (_,  []) -> putDoc doc1
+              ([], _ ) -> putDoc doc2
+              _ -> putDoc $ doc1 </> line <> doc2

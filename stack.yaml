@@ -11,4 +11,4 @@ extra-deps:
   # LTS 2.10 contains an old (0.4.x) version of srcloc, so we override it
   - srcloc-0.5.0.2
   # Depends on srcloc, thus can't be taken from LTS. Specify manually.
-  - mainland-pretty-0.2.7.2
+  - mainland-pretty-0.4.0.0

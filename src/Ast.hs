@@ -43,7 +43,7 @@ instance Hashable n => Hashable (Term n)
 instance Hashable1 Term
 
 instance Show (Term String) where
-  show = show . ppr
+  show = pretty 80 . ppr
 
 instance Functor Term where
   fmap = liftM
